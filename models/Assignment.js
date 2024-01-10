@@ -4,15 +4,16 @@ const { Schema, model } = mongoose;
 const assignmentSchema = new Schema({
   startDate: {
     type: Date,
-    required: true,
+    // required: true,
   },
   endDate: {
     type: Date,
-    required: true,
+    // required: true,
   },
   file: {
     type: String,
     trim: true,
+    required : true,
   },
   title: {
     type: String,

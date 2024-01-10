@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 const upload = require("../utils/multer");
 const uploadOnCloudinary = require("../utils/uploadOnCloudinary");
+const Assignment = require("../models/Assignment");
 
 // POST - /api/assignments/?role=teacher --> for uploading assignment
 router.post("/", (req, res) => {
@@ -16,13 +17,16 @@ router.post("/", (req, res) => {
         console.error(err);
         return res.status(500).json({ error: "Failed to handle file upload" });
       }
-      // Now you can access the uploaded file details using req.file
-      console.log("Assignment created successfully", req.file);
 
       const URL = await uploadOnCloudinary(req.file.path);
       console.log("Uploaded to cloudinary", URL);
 
-      res.json({URL});
+      const assignment = await Assignment.create({
+        file : URL, title : "FIRST ASSIGNMENT"
+      });
+
+      console.log("Assignment created", assignment);
+      res.json({URL : assignment.file});
     });
   } catch (err) {
     console.log(err);
