@@ -3,14 +3,17 @@ const router = express.Router();
 const upload = require("../utils/multer");
 const uploadOnCloudinary = require("../utils/uploadOnCloudinary");
 const Assignment = require("../models/Assignment");
+const Course = require("../models/Course");
+const Teacher = require("../models/Teacher");
 
-// POST - /api/assignments/?role=teacher --> for uploading assignment
+// POST - /api/assignment/?role=teacher --> for uploading assignment
 router.post("/", (req, res) => {
   if (req.query.role !== "teacher") {
     return res.status(403).json({ error: "Unauthorized access" });
-  }
+  };
 
   try {
+
     // Call multer manually to handle file upload
     upload.single("file")(req, res, async(err) => {
       if (err) {
@@ -19,14 +22,19 @@ router.post("/", (req, res) => {
       }
 
       const URL = await uploadOnCloudinary(req.file.path);
-      console.log("Uploaded to cloudinary", URL);
 
-      const assignment = await Assignment.create({
+      const assignmentDoc = await Assignment.create({
         file : URL, title : "FIRST ASSIGNMENT"
       });
 
-      console.log("Assignment created", assignment);
-      res.json({URL : assignment.file});
+      console.log("assign",assignmentDoc);
+      const courseDoc = await Course.updateOne({
+        _id : "65a049c12de4d08cd7848bcb"
+      },{ $push: { assignments: assignmentDoc._id } }
+      )
+
+      console.log("course",courseDoc);
+      res.json({URL : assignmentDoc.file});
     });
   } catch (err) {
     console.log(err);

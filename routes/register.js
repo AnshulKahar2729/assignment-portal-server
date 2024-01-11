@@ -22,6 +22,7 @@ router.post("/", async (req, res) => {
         year,
         division,
       });
+      await newStudent.save();
 
       res.status(201).json(newStudent);
       const token = jwt.sign(
@@ -30,7 +31,6 @@ router.post("/", async (req, res) => {
         { expiresIn: '24h' }
       );
       
-      await newStudent.save();
 
       res.status(201).json({ token });
     } else if (req.body.role === "teacher") {
@@ -45,13 +45,13 @@ router.post("/", async (req, res) => {
         password: hashedPassword,
       });
 
+      await newTeacher.save();
+
       const token = jwt.sign(
         { teacherID: newTeacher._id, email: newTeacher.email, role: "teacher" },
         process.env.JWT_SECRET,
         { expiresIn: '24h' }
       );
-      
-      await newTeacher.save();
 
       res.status(201).json({ token });
     } else {
