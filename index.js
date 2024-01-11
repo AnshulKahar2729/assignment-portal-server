@@ -16,6 +16,7 @@ const assignmentRouter = require('./routes/assignment');
 const loginRouter = require('./routes/login');
 const registerRouter = require('./routes/register');
 const profileRouter = require('./routes/profile');
+const courseRouter = require('./routes/course');
 
 const PORT = process.env.PORT ||4000;
 
@@ -32,6 +33,7 @@ mongoose.connect(process.env.DB_URL).then(()=>{
 });
 
 app.use("/api/assignment", assignmentRouter);
+app.use("/api/course", courseRouter);
 app.use("/api/login", loginRouter);
 app.use("/api/register", registerRouter);
 app.use("/api/profile", profileRouter);
