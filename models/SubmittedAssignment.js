@@ -14,7 +14,7 @@ const submittedAssignmentSchema = new Schema({
   late: {
     type: Boolean,
     default: false,
-    required : true
+    // required : true
   },
   file: {
     type: String,

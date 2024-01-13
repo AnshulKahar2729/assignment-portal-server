@@ -32,7 +32,7 @@ router.get('/', async (req, res) => {
 });
 
 router.post("/", (req, res) =>{
-    if(req.body.role !== "student"){
+    if(req.body.role !== "teacher"){
         return res.status(403).json({error: "Unauthorized access"});
     }
 
@@ -50,5 +50,6 @@ router.post("/", (req, res) =>{
         res.status(500).json({error: "Failed to create course as a teacher"});
     }
 })
+
 
 module.exports = router;
