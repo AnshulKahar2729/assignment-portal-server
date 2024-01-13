@@ -9,7 +9,7 @@ const SubmittedAssignment = require("../models/SubmittedAssignment");
 
 // POST - /api/assignment/?role=teacher --> for uploading assignment
 router.post("/", (req, res) => {
-  if (req.query.role !== "teacher") {
+  if (req.body.role !== "teacher") {
     return res.status(403).json({ error: "Unauthorized access" });
   }
 
@@ -57,7 +57,7 @@ router.get("/", (req, res) => {
 
 // GET - /api/assignments/:assignmentId/?role=teacher --> for getting a assignment as a teacher and student both
 router.get("/:assignmentId", (req, res) => {
-  if (req.query.role !== "teacher") {
+  if (req.body.role !== "teacher") {
     return res.status(403).json({ error: "Unauthorized access" });
   }
   try {
@@ -71,7 +71,7 @@ router.get("/:assignmentId", (req, res) => {
 // STUDENTS
 // To submit an assignment as a student 
 router.post("/submitassignment/:assignmentId", (req, res) => {
-  if (req.query.role !== "student") {
+  if (req.body.role !== "student") {
     return res.status(403).json({ error: "Unauthorized access" });
   }
 
@@ -113,7 +113,6 @@ router.post("/submitassignment/:assignmentId", (req, res) => {
       res.json({ URL: submittedAssignmentDoc.file });
     });
 
-
   } catch (err) {
     console.log(err);
     res.status(500).json({ error: "Failed to submit assignment as a student" });
@@ -123,7 +122,7 @@ router.post("/submitassignment/:assignmentId", (req, res) => {
 
 // To get all submitted assignment as a student
 router.get("/submittedassignment", (req, res) => {
-  if (req.query.role !== "student") {
+  if (req.body.role !== "student") {
     return res.status(403).json({ error: "Unauthorized access" });
   }
   try {

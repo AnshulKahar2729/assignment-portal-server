@@ -3,7 +3,7 @@ const Course = require("../models/Course");
 const router = express.Router();
 
 router.post("/", (req, res) =>{
-    if(req.query.role !== "student"){
+    if(req.body.role !== "teacher"){
         return res.status(403).json({error: "Unauthorized access"});
     }
 
