@@ -9,9 +9,11 @@ const SubmittedAssignment = require("../models/SubmittedAssignment");
 
 // POST - /api/assignment/?role=teacher --> for uploading assignment
 router.post("/", (req, res) => {
-  if (req.body.role !== "teacher") {
+  if (req.query.role !== "teacher") {
     return res.status(403).json({ error: "Unauthorized access" });
   }
+
+  
 
   try {
     // Call multer manually to handle file upload
@@ -21,11 +23,13 @@ router.post("/", (req, res) => {
         return res.status(500).json({ error: "Failed to handle file upload" });
       }
 
+      const {title} = req.body;
+
       const URL = await uploadOnCloudinary(req.file.path);
 
       const assignmentDoc = await Assignment.create({
         file: URL,
-        title: "FIRST ASSIGNMENT",
+        title: title,
       });
 
       console.log("assign", assignmentDoc);
@@ -59,7 +63,7 @@ router.get("/", async (req, res) => {
 
 // GET - /api/assignments/:assignmentId/ --> for getting a assignment as a teacher and student both
 router.get("/:assignmentId", async (req, res) => {
-  if (req.body.role !== "teacher") {
+  if (req.query.role !== "teacher") {
     return res.status(403).json({ error: "Unauthorized access" });
   }
   const { assignmentId } = req.params;
@@ -81,7 +85,7 @@ router.get("/:assignmentId", async (req, res) => {
 // STUDENTS
 // To submit an assignment as a student 
 router.post("/submitassignment/:assignmentId", (req, res) => {
-  if (req.body.role !== "student") {
+  if (req.query.role !== "student") {
     return res.status(403).json({ error: "Unauthorized access" });
   }
 
@@ -132,7 +136,7 @@ router.post("/submitassignment/:assignmentId", (req, res) => {
 
 // To get all submitted assignment as a student
 router.get("/submittedassignment",async (req, res) => {
- /*  if (req.body.role !== "student") {
+ /*  if (req.query.role !== "student") {
     return res.status(403).json({ error: "Unauthorized access" });
   } */
   try {

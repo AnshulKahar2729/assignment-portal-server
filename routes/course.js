@@ -31,12 +31,15 @@ router.get('/', async (req, res) => {
     }
 });
 
+// POST
 router.post("/", async (req, res) =>{
     if(req.body.role !== "teacher"){
         return res.status(403).json({error: "Unauthorized access"});
     }
 
     try{
+
+        const teacherId = "akkjs"
         const {name} = req.body;
 
         const newCourse = new Course({
