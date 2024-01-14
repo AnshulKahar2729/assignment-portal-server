@@ -9,11 +9,14 @@ cloudinary.config({
 module.exports = async(buffer) => {
     try{
 
+        console.log("BEFORE BUFFER");
         if (!buffer || !Buffer.isBuffer(buffer)) {
             return null;
         }
+        console.log("AFTER BUFFER");
 
         const res = await cloudinary.uploader.upload_stream(buffer, {
+            folder:"submittedAssignment",
             resource_type: 'raw',
             type : "authenticated",
         });
