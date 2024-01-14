@@ -21,9 +21,7 @@ const courseRouter = require('./routes/course');
 const PORT = process.env.PORT ||4000;
 
 // Middleware
-app.use(cors({
-    origin: 'https://assignment-portal-client.vercel.app', // Replace with your actual frontend URL
-  }));
+app.use(cors());
 app.use(express.json());
 app.use(cookieParser());
 app.use(bodyParser.json());
