@@ -31,7 +31,7 @@ router.get('/', async (req, res) => {
     }
 });
 
-router.post("/", (req, res) =>{
+router.post("/", async (req, res) =>{
     if(req.body.role !== "teacher"){
         return res.status(403).json({error: "Unauthorized access"});
     }
@@ -39,11 +39,14 @@ router.post("/", (req, res) =>{
     try{
         const {name} = req.body;
 
-        const course = new Course({
+        const newCourse = new Course({
             name,
         });
 
-        res.json({course});
+        await newCourse.save();
+
+
+        res.json({newCourse});
         
     } catch(err){
         console.log(err);

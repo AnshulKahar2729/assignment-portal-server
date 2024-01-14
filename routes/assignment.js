@@ -45,26 +45,36 @@ router.post("/", (req, res) => {
   }
 });
 
-// GET - /api/assignments/?role=teacher --> for getting all assignment as a teacher and student both
-router.get("/", (req, res) => {
+// GET - /api/assignments/for getting all assignment as a teacher and student both
+router.get("/", async (req, res) => {
   try {
     // Retrieve all assignments from the database as a teacher
+    const assignments = await Assignment.find();
+    res.json(assignments);
   } catch (err) {
     console.log(err);
-    res.status(500).json({ error: "Failed to get assignment as a teacher" });
+    res.status(500).json({ error: "Failed to get assignment" });
   }
 });
 
-// GET - /api/assignments/:assignmentId/?role=teacher --> for getting a assignment as a teacher and student both
-router.get("/:assignmentId", (req, res) => {
+// GET - /api/assignments/:assignmentId/ --> for getting a assignment as a teacher and student both
+router.get("/:assignmentId", async (req, res) => {
   if (req.body.role !== "teacher") {
     return res.status(403).json({ error: "Unauthorized access" });
   }
+  const { assignmentId } = req.params;
   try {
     // Retrieve a assignment from the database as a teacher
+    const assignment = await Assignment.findById(assignmentId);
+        
+    if (!assignment) {
+    return res.status(404).json({ error: 'Assignment not found' });
+    }
+    
+    res.json(course);
   } catch (err) {
     console.log(err);
-    res.status(500).json({ error: "Failed to get assignment as a teacher" });
+    res.status(500).json({ error: "Failed to get assignment by provided ID" });
   }
 });
 
@@ -121,12 +131,14 @@ router.post("/submitassignment/:assignmentId", (req, res) => {
 
 
 // To get all submitted assignment as a student
-router.get("/submittedassignment", (req, res) => {
+router.get("/submittedassignment",async (req, res) => {
   if (req.body.role !== "student") {
     return res.status(403).json({ error: "Unauthorized access" });
   }
   try {
     // Retrieve all submittedAssignments from the database as a student
+    const submittedAssignments = await SubmittedAssignment.find();
+    res.json(submittedAssignments);
   } catch (err) {
     console.log(err);
     res
