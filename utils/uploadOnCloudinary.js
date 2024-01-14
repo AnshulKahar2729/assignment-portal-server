@@ -10,7 +10,7 @@ module.exports = async(buffer) => {
     try{
 
         console.log("BEFORE BUFFER");
-        if (!buffer || !Buffer.isBuffer(buffer)) {
+        if (!buffer) {
             return null;
         }
         console.log("AFTER BUFFER");
