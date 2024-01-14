@@ -7,25 +7,23 @@ cloudinary.config({
   api_secret: process.env.CLOUDINARY_API_SECRET
 });
 
-module.exports = async(localFilePath) => {
+module.exports = async(buffer) => {
     try{
 
-        if(!localFilePath){
+        if (!buffer || !Buffer.isBuffer(buffer)) {
             return null;
         }
 
-        const res = await cloudinary.uploader.upload(localFilePath, {
-            folder: 'submittedAssignment',
+        const res = await cloudinary.uploader.upload(buffer, {
             resource_type: 'raw',
             type : "authenticated",
         });
 
         // if file is uploaded on cloudinary then delete it from file system
-        fs.unlinkSync(localFilePath);
+        // fs.unlinkSync(localFilePath);
         return res.secure_url;
     }catch(error){
         console.log(error);
-        fs.unlinkSync(localFilePath);
         return null;
     }
 }
