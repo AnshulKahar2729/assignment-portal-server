@@ -3,19 +3,19 @@ const router = express.Router();
 // const upload = require("../utils/multer");
 // const uploadOnCloudinary = require("../utils/uploadOnCloudinary");
 // const express = require('express');
-const cloudinary = require('cloudinary').v2;
-const multer = require('multer');
-const fs = require('fs');
+const cloudinary = require("cloudinary").v2;
+const multer = require("multer");
+const fs = require("fs");
 const Assignment = require("../models/Assignment");
 const Course = require("../models/Course");
 const Teacher = require("../models/Teacher");
 const SubmittedAssignment = require("../models/SubmittedAssignment");
 
 // Cloudinary configuration
-cloudinary.config({ 
-  cloud_name: process.env.CLOUDINARY_CLOUD_NAME, 
-  api_key: process.env.CLOUDINARY_API_KEY, 
-  api_secret: process.env.CLOUDINARY_API_SECRET
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
 // Multer setup with memory storage
@@ -63,28 +63,51 @@ const upload = multer({ storage });
   }
 }); */
 
-router.post("/", upload.single('file'), async(req, res) => {
+router.post("/", upload.single("file"), async (req, res) => {
   if (req.query.role !== "teacher") {
     return res.status(403).json({ error: "Unauthorized access" });
   }
 
   try {
-    const result = await cloudinary.uploader.upload_stream({/* Cloudinary options */}, (error, result) => {
-      if (error) {
-        console.error(error);
-        res.status(500).json({ error });
-      } else {
-        // You can now handle the Cloudinary result, e.g., store the URL or public ID in MongoDB.
-        console.log(result);
-        res.status(200).json({ message: 'File uploaded successfully.' });
-      }
-    }).end(req.file.buffer);
+    const { title } = req.body;
+    const result = await cloudinary.uploader
+      .upload_stream(
+        {
+          /* Cloudinary options */
+        },
+        async (error, result) => {
+          if (error) {
+            console.error(error);
+            res.status(500).json({ error });
+          } else {
+            // You can now handle the Cloudinary result, e.g., store the URL or public ID in MongoDB.
+            console.log(result);
+            const URL = result.secure_url;
+            const assignmentDoc = await Assignment.create({
+              file: URL,
+              title: title,
+            });
 
+            console.log("assign", assignmentDoc);
+            const courseDoc = await Course.updateOne(
+              {
+                _id: "65a049c12de4d08cd7848bcb",
+              },
+              { $push: { assignments: assignmentDoc._id } }
+            );
+
+            console.log("course", courseDoc);
+            res.json({ URL: assignmentDoc.file });
+            res.status(200).json({ URL: result.secure_url });
+          }
+        }
+      )
+      .end(req.file.buffer);
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: 'Internal Server Error' });
+    res.status(500).json({ message: "Internal Server Error" });
   }
-})
+});
 
 // GET - /api/assignments/for getting all assignment as a teacher and student both
 router.get("/", async (req, res) => {
@@ -107,11 +130,11 @@ router.get("/:assignmentId", async (req, res) => {
   try {
     // Retrieve a assignment from the database as a teacher
     const assignment = await Assignment.findById(assignmentId);
-        
+
     if (!assignment) {
-    return res.status(404).json({ error: 'Assignment not found' });
+      return res.status(404).json({ error: "Assignment not found" });
     }
-    
+
     res.json(course);
   } catch (err) {
     console.log(err);
@@ -120,7 +143,7 @@ router.get("/:assignmentId", async (req, res) => {
 });
 
 // STUDENTS
-// To submit an assignment as a student 
+// To submit an assignment as a student
 router.post("/submitassignment/:assignmentId", (req, res) => {
   if (req.query.role !== "student") {
     return res.status(403).json({ error: "Unauthorized access" });
@@ -163,17 +186,15 @@ router.post("/submitassignment/:assignmentId", (req, res) => {
 
       res.json({ URL: submittedAssignmentDoc.file });
     });
-
   } catch (err) {
     console.log(err);
     res.status(500).json({ error: "Failed to submit assignment as a student" });
   }
 });
 
-
 // To get all submitted assignment as a student
-router.get("/submittedassignment",async (req, res) => {
- /*  if (req.query.role !== "student") {
+router.get("/submittedassignment", async (req, res) => {
+  /*  if (req.query.role !== "student") {
     return res.status(403).json({ error: "Unauthorized access" });
   } */
   try {
