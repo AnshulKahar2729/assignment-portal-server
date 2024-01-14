@@ -132,9 +132,9 @@ router.post("/submitassignment/:assignmentId", (req, res) => {
 
 // To get all submitted assignment as a student
 router.get("/submittedassignment",async (req, res) => {
-  if (req.body.role !== "student") {
+ /*  if (req.body.role !== "student") {
     return res.status(403).json({ error: "Unauthorized access" });
-  }
+  } */
   try {
     // Retrieve all submittedAssignments from the database as a student
     const submittedAssignments = await SubmittedAssignment.find();
