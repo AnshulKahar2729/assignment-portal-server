@@ -23,7 +23,7 @@ const PORT = process.env.PORT || 4000;
 // Middleware
 // Middleware
 const corsOptions = {
-  origin: "http://localhost:3000", // replace with your frontend URL
+  origin: "*", // replace with your frontend URL
   credentials: true, // include credentials like cookies in the request
   methods: "GET,HEAD,PUT,PATCH,POST,DELETE", // specify the allowed HTTP methods
   allowedHeaders: "Content-Type,Authorization", // specify the allowed headers
