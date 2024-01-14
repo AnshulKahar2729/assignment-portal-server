@@ -13,7 +13,7 @@ module.exports = async(buffer) => {
             return null;
         }
 
-        const res = await cloudinary.uploader.upload(buffer, {
+        const res = await cloudinary.uploader.upload_stream(buffer, {
             resource_type: 'raw',
             type : "authenticated",
         });
