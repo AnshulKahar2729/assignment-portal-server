@@ -23,7 +23,7 @@ router.post("/", (req, res) => {
 
       const {title} = req.body;
 
-      const URL = await uploadOnCloudinary(req.file.buffer);
+      const URL = await uploadOnCloudinary(req.file.buffer.toString('base64'));
 
       const assignmentDoc = await Assignment.create({
         file: URL,
