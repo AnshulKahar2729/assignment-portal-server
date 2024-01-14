@@ -72,7 +72,7 @@ router.post("/", upload.single('file'), async(req, res) => {
     const result = await cloudinary.uploader.upload_stream({/* Cloudinary options */}, (error, result) => {
       if (error) {
         console.error(error);
-        res.status(500).json({ message: 'Failed to upload to Cloudinary' });
+        res.status(500).json({ error });
       } else {
         // You can now handle the Cloudinary result, e.g., store the URL or public ID in MongoDB.
         console.log(result);
