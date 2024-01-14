@@ -1,7 +1,11 @@
-const express = require("express");
+// const express = require("express");
 const router = express.Router();
 // const upload = require("../utils/multer");
 // const uploadOnCloudinary = require("../utils/uploadOnCloudinary");
+const express = require('express');
+const cloudinary = require('cloudinary').v2;
+const multer = require('multer');
+const fs = require('fs');
 const Assignment = require("../models/Assignment");
 const Course = require("../models/Course");
 const Teacher = require("../models/Teacher");
