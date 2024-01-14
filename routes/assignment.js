@@ -97,7 +97,6 @@ router.post("/", upload.single("file"), async (req, res) => {
             );
 
             console.log("course", courseDoc);
-            res.json({ URL: assignmentDoc.file });
             res.status(200).json({ URL: result.secure_url });
           }
         }
