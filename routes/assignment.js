@@ -1,14 +1,25 @@
 const express = require("express");
 const router = express.Router();
-const upload = require("../utils/multer");
-const uploadOnCloudinary = require("../utils/uploadOnCloudinary");
+// const upload = require("../utils/multer");
+// const uploadOnCloudinary = require("../utils/uploadOnCloudinary");
 const Assignment = require("../models/Assignment");
 const Course = require("../models/Course");
 const Teacher = require("../models/Teacher");
 const SubmittedAssignment = require("../models/SubmittedAssignment");
 
+// Cloudinary configuration
+cloudinary.config({ 
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME, 
+  api_key: process.env.CLOUDINARY_API_KEY, 
+  api_secret: process.env.CLOUDINARY_API_SECRET
+});
+
+// Multer setup with memory storage
+const storage = multer.memoryStorage();
+const upload = multer({ storage });
+
 // POST - /api/assignment/?role=teacher --> for uploading assignment
-router.post("/", (req, res) => {
+/* router.post("/", (req, res) => {
   if (req.query.role !== "teacher") {
     return res.status(403).json({ error: "Unauthorized access" });
   }
@@ -46,7 +57,30 @@ router.post("/", (req, res) => {
     console.log(err);
     res.status(500).json({ error: "Failed to create assignment as a teacher" });
   }
-});
+}); */
+
+router.post("/", upload.single('file'), async(req, res) => {
+  if (req.query.role !== "teacher") {
+    return res.status(403).json({ error: "Unauthorized access" });
+  }
+
+  try {
+    const result = await cloudinary.uploader.upload_stream({/* Cloudinary options */}, (error, result) => {
+      if (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Failed to upload to Cloudinary' });
+      } else {
+        // You can now handle the Cloudinary result, e.g., store the URL or public ID in MongoDB.
+        console.log(result);
+        res.status(200).json({ message: 'File uploaded successfully.' });
+      }
+    }).end(req.file.buffer);
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Internal Server Error' });
+  }
+})
 
 // GET - /api/assignments/for getting all assignment as a teacher and student both
 router.get("/", async (req, res) => {
