@@ -18,7 +18,7 @@ router.post("/", (req, res) => {
     upload.single("file")(req, res, async (err) => {
       if (err) {
         console.error(err);
-        return res.status(500).json({ error: "Failed to handle file upload" });
+        return res.status(500).json({ err });
       }
 
       const {title} = req.body;
