@@ -6,17 +6,17 @@ cloudinary.config({
   api_secret: process.env.CLOUDINARY_API_SECRET
 });
 
-module.exports = async(buffer) => {
+module.exports = async(filePath) => {
     try{
 
-        console.log("BEFORE BUFFER");
-        if (!buffer) {
+        console.log("BEFORE file path");
+        if (!filePath) {
             return null;
         }
-        console.log("AFTER BUFFER");
+        console.log("AFTER file path");
 
-        const res = await cloudinary.uploader.upload_stream(buffer, {
-            folder:"submittedAssignment",
+        const res = await cloudinary.uploader.upload(filePath, {
+            folder:"submittedAssignment/",
             resource_type: 'raw',
             type : "authenticated",
         });
