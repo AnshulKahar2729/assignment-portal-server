@@ -23,7 +23,7 @@ const PORT = process.env.PORT ||4000;
 // Middleware
 app.use(cors(
     {
-        origin : "*"
+        origin : ["http://localhost:3000/", "https://assignment-portal-client.vercel.app/"]
     }
 ));
 app.use(express.json());
