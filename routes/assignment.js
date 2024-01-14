@@ -13,8 +13,6 @@ router.post("/", (req, res) => {
     return res.status(403).json({ error: "Unauthorized access" });
   }
 
-  
-
   try {
     // Call multer manually to handle file upload
     upload.single("file")(req, res, async (err) => {

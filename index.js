@@ -1,36 +1,43 @@
-const express = require('express');
+const express = require("express");
 require("dotenv").config();
 const app = express();
-const cors = require('cors');
-const cookieParser = require('cookie-parser');
+const cors = require("cors");
+const cookieParser = require("cookie-parser");
 const bodyParser = require("body-parser");
-const mongoose = require('mongoose');
-const multer = require('multer');
+const mongoose = require("mongoose");
+const multer = require("multer");
 
 // models
-const { upload } = require('./utils/multer');
-const { Student } = require('./models/Student');
+const { upload } = require("./utils/multer");
+const { Student } = require("./models/Student");
 
 // routes
-const assignmentRouter = require('./routes/assignment');
-const loginRouter = require('./routes/login');
-const registerRouter = require('./routes/register');
-const profileRouter = require('./routes/profile');
-const courseRouter = require('./routes/course');
+const assignmentRouter = require("./routes/assignment");
+const loginRouter = require("./routes/login");
+const registerRouter = require("./routes/register");
+const profileRouter = require("./routes/profile");
+const courseRouter = require("./routes/course");
 
-const PORT = process.env.PORT ||4000;
+const PORT = process.env.PORT || 4000;
 
 // Middleware
-app.use(cors());
+const corsOptions = {
+  origin: "http://localhost:3000", // replace with your frontend URL
+  credentials: true, // include credentials like cookies in the request
+};
+app.use(cors(corsOptions));
 app.use(express.json());
 app.use(cookieParser());
 app.use(bodyParser.json());
 
-mongoose.connect(process.env.DB_URL).then(()=>{
+mongoose
+  .connect(process.env.DB_URL)
+  .then(() => {
     console.log("DB connected");
-}).catch((err) => {
+  })
+  .catch((err) => {
     console.log(err);
-});
+  });
 
 app.use("/api/assignment", assignmentRouter);
 app.use("/api/course", courseRouter);
@@ -38,12 +45,10 @@ app.use("/api/login", loginRouter);
 app.use("/api/register", registerRouter);
 app.use("/api/profile", profileRouter);
 
-app.get('/api/test', (req, res) => {
-    res.send('Hello World!');
-
-    }
-);
+app.get("/api/test", (req, res) => {
+  res.send("Hello World!");
+});
 
 app.listen(PORT, () => {
-    console.log(`Server is running on port ${PORT}`);
+  console.log(`Server is running on port ${PORT}`);
 });
