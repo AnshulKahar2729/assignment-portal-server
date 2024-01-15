@@ -22,7 +22,6 @@ const studentSchema = new Schema({
     type: String,
     required: true,
     unique: true,
-    trim: true,
   },
   branch: {
     type: String,
@@ -30,7 +29,7 @@ const studentSchema = new Schema({
     trim: true,
   },
   year: {
-    type: Number,
+    type: String,
     required: true,
   },
   division: {

@@ -1,61 +1,128 @@
 const express = require("express");
 const Course = require("../models/Course");
 const router = express.Router();
+const Teacher = require("../models/Teacher");
+const Student = require("../models/Student");
 
 // GET with ID
-router.get('/:courseId', async (req, res) => {
-    const { courseId } = req.params;
+router.get("/:courseId", async (req, res) => {
+  const { courseId } = req.params;
 
-    try {
-        const course = await Course.findById(courseId);
-        
-        if (!course) {
-        return res.status(404).json({ error: 'Course not found' });
-        }
-        
-        res.json(course);
-    } catch (error) {
-        console.error('Error fetching course:', error);
-        res.status(500).send('Internal Server Error');
+  try {
+    const course = await Course.findById(courseId);
+
+    if (!course) {
+      return res.status(404).json({ error: "Course not found" });
     }
++
+    res.json(course);
+  } catch (error) {
+    console.error("Error fetching course:", error);
+    res.status(500).send("Internal Server Error");
+  }
 });
 
 // GET all course general
-router.get('/', async (req, res) => {
-    try {
+router.get("/", async (req, res) => {
+  try {
+    if (req.query.role === "teacher") {
+      const { teacherId } = req.body;
+      const teacherDoc = await Teacher.findOne({ teacherId });
+      console.log(teacherDoc);
+      if (!teacherDoc) {
+        return res.status(404).json({ error: "Teacher not found" });
+      }
+      console.log(teacherDoc);
+      const courses = await Course.find({ teacher: teacherDoc._id });
+
+      res.status(200).json(courses);
+    } else if (req.query.role === "student") {
+      const { studentId } = req.body;
+
+      // need to find the courses in which the student is enrolled
+      const studentDoc = await Student.findOne({ studentId });
+
+      if (!studentDoc) {
+        return res.status(404).json({ error: "Student not found" });
+      }
+
+      const courses = await Course.find({ studentsEnrolled: studentDoc._id });
+      if(courses){
+        res.status(200).json(courses);
+      } else {
         const courses = await Course.find();
-        res.json(courses);
-    } catch (error) {
-        console.error('Error fetching courses:', error);
-        res.status(500).send('Internal Server Error');
+        res.status(200).json({name : courses.name, teacher : courses.teacher, numberOfStudents : courses.studentsEnrolled.length});
+      }
+      
+    } else {
+      res.status(403).json({ error: "Unauthorized access" });
     }
+  } catch (error) {
+    console.error("Error fetching courses:", error);
+    res.status(500).send("Internal Server Error");
+  }
 });
 
-// POST
-router.post("/", async (req, res) =>{
-    if(req.body.role !== "teacher"){
-        return res.status(403).json({error: "Unauthorized access"});
+// POST --> as a teacher
+router.post("/", async (req, res) => {
+  if (req.query.role !== "teacher") {
+    return res.status(403).json({ error: "Unauthorized access" });
+  }
+
+  try {
+    const { name, teacherId } = req.body;
+    console.log(name, teacherId);
+
+    const teacherDoc = await Teacher.findOne({ teacherId });
+    console.log(teacherDoc);
+    if (!teacherDoc) {
+      return res.status(404).json({ error: "Teacher not found" });
+    }
+    console.log(teacherDoc);
+
+    const courseDoc = new Course({
+      name,
+      teacher: teacherDoc._id,
+    });
+    console.log(courseDoc);
+
+    await courseDoc.save();
+    console.log(courseDoc);
+
+    res.json({ courseDoc });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ error });
+  }
+});
+
+// API for enrolling a course a student
+router.post("/enroll:courseId", async (req, res) => {
+  try {
+    const { courseId } = req.params;
+    const { studentId } = req.body;
+
+    const courseDoc = await Course.findById(courseId);
+    if (!courseDoc) {
+      return res.status(404).json({ error: "Course not found" });
     }
 
-    try{
-
-        const teacherId = "akkjs"
-        const {name} = req.body;
-
-        const newCourse = new Course({
-            name,
-        });
-
-        await newCourse.save();
-
-
-        res.json({newCourse});
-        
-    } catch(err){
-        console.log(err);
-        res.status(500).json({error: "Failed to create course as a teacher"});
+    const studentDoc = await Student.findOne({ studentId });
+    if (!studentDoc) {
+      return res.status(404).json({ error: "Student not found" });
     }
-})
 
+    await Course.findByIdAndUpdate(
+      courseId,
+      { $push: { students: studentDoc._id } },
+      { new: true }
+    );
+
+    res.status(200).json({ message: "Enrolled successfully" });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error });
+  }
+});
 
 module.exports = router;

@@ -20,7 +20,7 @@ const teacherSchema = new Schema({
   },
   teacherId: {
     type: String,
-    // required: true,
+    required: true,
     unique: true,
     trim: true,
   },

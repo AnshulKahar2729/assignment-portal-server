@@ -4,6 +4,7 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const Student = require("../models/Student");
 const Teacher = require("../models/Teacher");
+const crypto = require("crypto");
 
 router.post("/", async (req, res) => {
   try {
@@ -11,27 +12,38 @@ router.post("/", async (req, res) => {
     if (req.body.role === "student") {
       const { name, email, password, branch, year, division } = req.body;
 
-    //   console.log(name, email, password, branch, year, division )
+      console.log(name, email, password, branch, year, division);
+
+      //   console.log(name, email, password, branch, year, division )
       const hashedPassword = await bcrypt.hash(password, 10);
 
-      const newStudent = new Student({
+      // use crypto to createStudentId using name, branch, division of length 10
+      const studentId = crypto
+        .createHash("sha256")
+        .update(`${name}${branch}${division}`)
+        .digest("hex")
+        .substring(0, 10);
+
+      const studentDoc = new Student({
         name,
         email,
-        password : hashedPassword,
+        password: hashedPassword,
         branch,
         year,
         division,
+        studentId,
       });
-      await newStudent.save();
+      await studentDoc.save();
 
-      res.status(201).json(newStudent);
+      console.log(studentDoc);
+
       const token = jwt.sign(
-        { studentID: newStudent._id, email: newStudent.email, role: "student" },
+        { studentId, id:studentDoc._id, name:studentDoc.name, email: studentDoc.email, role: "student" },
         process.env.JWT_SECRET,
-        { expiresIn: '24h' }
+        { expiresIn: "24h" }
       );
-      
 
+      console.log(token);
       res.status(201).json({ token });
     } else if (req.body.role === "teacher") {
       const { name, email, password } = req.body;
@@ -39,18 +51,25 @@ router.post("/", async (req, res) => {
       // Add logic for teacher registration (if needed)
       const hashedPassword = await bcrypt.hash(password, 10);
 
-      const newTeacher = new Teacher({
+      const teacherId = crypto
+        .createHash("sha256")
+        .update(`${name}${"teacher"}`)
+        .digest("hex")
+        .substring(0, 10);
+
+      const teacherDoc = new Teacher({
         name,
         email,
         password: hashedPassword,
+        teacherId
       });
 
-      await newTeacher.save();
+      await teacherDoc.save();
 
       const token = jwt.sign(
-        { teacherID: newTeacher._id, email: newTeacher.email, role: "teacher" },
+        { teacherId, id: teacherDoc._id, name: teacherDoc.name, email: teacherDoc.email, role: "teacher" },
         process.env.JWT_SECRET,
-        { expiresIn: '24h' }
+        { expiresIn: "24h" }
       );
 
       res.status(201).json({ token });
@@ -59,7 +78,7 @@ router.post("/", async (req, res) => {
     }
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: "Internal Server Error" });
+    res.status(500).json({ error: error });
   }
 });
 
