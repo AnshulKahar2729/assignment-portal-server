@@ -46,9 +46,21 @@ router.get("/", async (req, res) => {
         return res.status(404).json({ error: "Student not found" });
       }
 
-      const courses = await Course.find({ studentsEnrolled: studentDoc._id });
-      if(courses){
-        res.status(200).json(courses);
+      const enrolledCoursesDoc = await Course.find({ studentsEnrolled: studentDoc._id });   // array of courses in which the student is enrolled
+      if(enrolledCoursesDoc){
+        const sendCourses = [];
+        const courses = await Course.find();   // array of all courses
+
+        courses.map((course, index) => {
+            enrolledCoursesDoc.map((enrolledCourse, index) => {
+                if(enrolledCourse._id === course.id){
+                    sendCourses.push(course);
+                } else {
+                    sendCourses.push({name : course.name, teacher : course.teacher, numberOfStudents : course.studentsEnrolled.length});
+                }
+            })
+        })
+        res.status(200).json({sendCourses});
       } else {
         const courses = await Course.find();
         res.status(200).json({name : courses.name, teacher : courses.teacher, numberOfStudents : courses.studentsEnrolled.length});
