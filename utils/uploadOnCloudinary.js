@@ -16,29 +16,22 @@ module.exports = async (buffer) => {
 
     console.log("AFTER file path");
 
-    upload.single("file")(req, res, async (err) => {
-      if (err) {
-        console.error(err);
-        return res.status(500).json({ err });
-      }
-
-      await cloudinary.uploader
-        .upload_stream(
-          {
-            // cloudinary options
-          },
-          async (error, result) => {
-            if (error) {
-              console.error(error);
-              res.status(500).json({ error });
-            } else{
-                const URL = result.secure_url;
-                return URL;
-            }
+    await cloudinary.uploader
+      .upload_stream(
+        {
+          // cloudinary options
+        },
+        async (error, result) => {
+          if (error) {
+            console.error(error);
+            res.status(500).json({ error });
+          } else {
+            const URL = result.secure_url;
+            return URL;
           }
-        )
-        .end(buffer);
-    });
+        }
+      )
+      .end(buffer);
   } catch (error) {
     console.log(error);
     return null;

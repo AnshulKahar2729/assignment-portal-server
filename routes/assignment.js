@@ -62,7 +62,7 @@ const upload = multer({ storage });
 
 
 
-router.post("/", async (req, res) => {
+router.post("/",upload.single("file") ,async (req, res) => {
   if (req.query.role !== "teacher") {
     return res.status(403).json({ error: "Unauthorized access" });
   }
