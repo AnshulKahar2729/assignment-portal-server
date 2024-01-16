@@ -114,21 +114,26 @@ router.post("/enroll/:courseId", async (req, res) => {
     const { courseId } = req.params;
     const { studentId } = req.body;
 
+    console.log(courseId, studentId);
+
     const courseDoc = await Course.findById(courseId);
+    console.log(courseDoc);
     if (!courseDoc) {
       return res.status(404).json({ error: "Course not found" });
     }
 
     const studentDoc = await Student.findOne({ studentId });
+    console.log(studentDoc);
     if (!studentDoc) {
       return res.status(404).json({ error: "Student not found" });
     }
 
-    await Course.findByIdAndUpdate(
+    const updatedCourseDoc = await Course.findByIdAndUpdate(
       courseId,
-      { $push: { students: studentDoc._id } },
+      { $push: { studentsEnrolled: studentDoc._id } },
       { new: true }
     );
+    console.log(updatedCourseDoc);
 
     res.status(200).json({ message: "Enrolled successfully" });
   } catch (error) {
