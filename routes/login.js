@@ -34,14 +34,14 @@ router.post("/", async (req, res) => {
     if (role === "student") {
       const { studentId } = req.body;
       token = jwt.sign(
-        { studentId, userID: user._id, email: user.email, role },
+        { studentId, id: user._id, email: user.email, role },
         process.env.JWT_SECRET,
         { expiresIn: "24h" }
       );
     } else if (role === "teacher") {
       const { teacherId } = req.body;
       token = jwt.sign(
-        { teacherId, userID: user._id, email: user.email, role },
+        { teacherId, id: user._id, email: user.email, role },
         process.env.JWT_SECRET,
         { expiresIn: "24h" }
       );
