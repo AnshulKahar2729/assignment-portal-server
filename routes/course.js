@@ -4,7 +4,7 @@ const router = express.Router();
 const Teacher = require("../models/Teacher");
 const Student = require("../models/Student");
 
-// GET with ID
+// GET with ID --> need to delete later
 router.get("/:courseId", async (req, res) => {
   const { courseId } = req.params;
 
@@ -109,7 +109,7 @@ router.post("/", async (req, res) => {
 });
 
 // API for enrolling a course a student
-router.post("/enroll:courseId", async (req, res) => {
+router.post("/enroll/:courseId", async (req, res) => {
   try {
     const { courseId } = req.params;
     const { studentId } = req.body;
