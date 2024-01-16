@@ -105,13 +105,11 @@ router.post("/", upload.single("file"), async (req, res) => {
   }
 });
 
-router.post("/v2", async (req, res) => {
+router.post("v2", async (req, res) => {
   if (req.query.role !== "teacher") {
     return res.status(403).json({ error: "Unauthorized access" });
   }
-  if (!req.file) {
-    return res.status(400).json({ error: "File not provided" });
-  }
+ 
 
   try {
     const { title } = req.body;
