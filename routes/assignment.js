@@ -60,9 +60,53 @@ const upload = multer({ storage });
   }
 }); */
 
+router.post("/", upload.single("file"), async (req, res) => {
+  if (req.query.role !== "teacher") {
+    return res.status(403).json({ error: "Unauthorized access" });
+  }
+
+  try {
+    const { title } = req.body;
+    const result = await cloudinary.uploader
+      .upload_stream(
+        {
+          /* Cloudinary options */
+        },
+        async (error, result) => {
+          if (error) {
+            console.error(error);
+            res.status(500).json({ error });
+          } else {
+            // You can now handle the Cloudinary result, e.g., store the URL or public ID in MongoDB.
+            console.log(result);
+            const URL = result.secure_url;
+            const assignmentDoc = await Assignment.create({
+              file: URL,
+              title: title,
+            });
+
+            console.log("assign", assignmentDoc);
+            const courseDoc = await Course.updateOne(
+              {
+                _id: "65a049c12de4d08cd7848bcb",
+              },
+              { $push: { assignments: assignmentDoc._id } }
+            );
+
+            console.log("course", courseDoc);
+            res.status(200).json({ URL: result.secure_url });
+          }
+        }
+      )
+      .end(req.file.buffer);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+});
 
 
-router.post("/",upload.single("file") ,async (req, res) => {
+/* router.post("/",upload.single("file") ,async (req, res) => {
   if (req.query.role !== "teacher") {
     return res.status(403).json({ error: "Unauthorized access" });
   }
@@ -99,7 +143,7 @@ router.post("/",upload.single("file") ,async (req, res) => {
     console.error(error);
     res.status(500).json({ error });
   }
-});
+}); */
 
 // GET - /api/assignments/for getting all assignment as a teacher and student both
 router.get("/", async (req, res) => {
