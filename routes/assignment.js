@@ -109,24 +109,32 @@ router.post("v2", async (req, res) => {
   if (req.query.role !== "teacher") {
     return res.status(403).json({ error: "Unauthorized access" });
   }
- 
+  
+  console.log("here");
 
   try {
+
     const { title } = req.body;
+    console.log(title);
+    console.log(req.file.buffer);
 
     const URL = await uploadOnCloudinary(req.file.buffer);
 
+    console.log(URL);
     const assignmentDoc = await Assignment.create({
       file: URL,
       title: title,
     });
 
+    console.log("assign", assignmentDoc);
     const courseDoc = await Course.updateOne(
       {
         _id: "65a049c12de4d08cd7848bcb",
       },
       { $push: { assignments: assignmentDoc._id } }
     );
+
+    console.log("course", courseDoc);
 
     res.status(200).json({ URL });
 
