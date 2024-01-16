@@ -1,11 +1,8 @@
 const express = require("express");
 const router = express.Router();
-// const upload = require("../utils/multer");
-// const uploadOnCloudinary = require("../utils/uploadOnCloudinary");
-// const express = require('express');
+const uploadOnCloudinary = require("../utils/uploadOnCloudinary");
 const cloudinary = require("cloudinary").v2;
 const multer = require("multer");
-const fs = require("fs");
 const Assignment = require("../models/Assignment");
 const Course = require("../models/Course");
 const Teacher = require("../models/Teacher");
@@ -105,6 +102,39 @@ router.post("/", upload.single("file"), async (req, res) => {
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Internal Server Error" });
+  }
+});
+
+router.post("/v2", async (req, res) => {
+  if (req.query.role !== "teacher") {
+    return res.status(403).json({ error: "Unauthorized access" });
+  }
+  if (!req.file) {
+    return res.status(400).json({ error: "File not provided" });
+  }
+
+  try {
+    const { title } = req.body;
+
+    const URL = await uploadOnCloudinary(req.file.buffer);
+
+    const assignmentDoc = await Assignment.create({
+      file: URL,
+      title: title,
+    });
+
+    const courseDoc = await Course.updateOne(
+      {
+        _id: "65a049c12de4d08cd7848bcb",
+      },
+      { $push: { assignments: assignmentDoc._id } }
+    );
+
+    res.status(200).json({ URL });
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error });
   }
 });
 
