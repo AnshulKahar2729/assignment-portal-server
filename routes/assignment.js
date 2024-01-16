@@ -7,6 +7,7 @@ const Assignment = require("../models/Assignment");
 const Course = require("../models/Course");
 const Teacher = require("../models/Teacher");
 const SubmittedAssignment = require("../models/SubmittedAssignment");
+const Student = require("../models/Student");
 
 // Cloudinary configuration
 cloudinary.config({
@@ -104,7 +105,6 @@ router.post("/", upload.single("file"), async (req, res) => {
     res.status(500).json({ message: "Internal Server Error" });
   }
 });
-
 
 /* router.post("/",upload.single("file") ,async (req, res) => {
   if (req.query.role !== "teacher") {
@@ -220,6 +220,13 @@ router.post("/submitassignment/:assignmentId", (req, res) => {
 
       console.log("assignment", assignmentDoc);
 
+      const studentDoc = await Student.updateOne(
+        {
+          studentId,
+        },
+        { $push: { submittedAssignment: submittedAssignmentDoc._id } }
+      );
+
       res.json({ URL: submittedAssignmentDoc.file });
     });
   } catch (err) {
@@ -234,9 +241,28 @@ router.get("/submittedassignment", async (req, res) => {
     return res.status(403).json({ error: "Unauthorized access" });
   } */
   try {
-    // Retrieve all submittedAssignments from the database as a student
-    const submittedAssignments = await SubmittedAssignment.find();
-    res.json(submittedAssignments);
+    const { studentId } = req.body;
+
+    if (!studentId) {
+      return res.status(403).json({ error: "Unauthorized access" });
+    }
+
+    const studentDoc = await Student.findOne({ studentId });
+
+    if (!studentDoc) {
+      return res.status(404).json({ error: "Student not found" });
+    }
+
+    const submissionsIdArr = studentDoc.submittedAssignment; // arrays of submissions id
+
+    const submissionsArr = [];
+
+    submissionsIdArr.forEach(async (submissionId) => {
+      const submissionDoc = await SubmittedAssignment.findById(submissionId);
+      submissionsArr.push(submissionDoc);
+    });
+
+    res.status(200).json(submissionsArr);
   } catch (err) {
     console.log(err);
     res
