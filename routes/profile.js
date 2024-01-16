@@ -2,18 +2,27 @@ const express = require("express");
 const router = express.Router();
 const Student = require("../models/Student");
 const Teacher = require("../models/Teacher");
+const jwt = require("jsonwebtoken");
+require("dotenv").config();
 
 // @route   GET api/profile with headers token
-router.post("/", async (req, res) => {
+router.get("/", async (req, res) => {
   try {
     const authHeader = req.header("Authorization");
-    if (!authorizationHeader || !authorizationHeader.startsWith("Bearer ")) {
+    console.log("header ", authHeader);
+    if (!authHeader || !authHeader.startsWith("Bearer ")) {
       return res.status(401).json({ message: "Unauthorized" });
     }
 
-    const token = authorizationHeader.split(" ")[1];
+    const token = authHeader.split(" ")[1];
 
-    const payLoad = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
+    console.log(token);
+
+    if (!token) {
+      return res.status(401).json({ message: "Unauthorized" });
+    }
+
+    const payLoad = jwt.verify(token, process.env.JWT_SECRET);
     if (!payLoad) {
       return res.status(401).json({ message: "Unauthorized" });
     }
@@ -24,8 +33,10 @@ router.post("/", async (req, res) => {
         return res.status(404).json({ message: "Student not found" });
       }
 
-      // delete student.password;
-      const { password, ...studentWithoutPassword } = student;
+      // Remove password from student object using destructuring
+      const { password, ...studentWithoutPassword } = student._doc;
+
+      console.log(studentWithoutPassword);
       return res.status(200).json(studentWithoutPassword);
     } else if (payLoad.role === "teacher") {
       const teacher = await Teacher.findById(payLoad.id);
@@ -33,13 +44,14 @@ router.post("/", async (req, res) => {
         return res.status(404).json({ message: "Teacher not found" });
       }
 
-      // delete teacher.password;
-      const { password, ...teacherWithoutPassword } = teacher;
+      const { password, ...teacherWithoutPassword } = teacher._doc;
+
+      console.log(teacherWithoutPassword);
       return res.status(200).json(teacherWithoutPassword);
     }
   } catch (error) {
     console.error(error.message);
-    res.status(500).json(error);
+    res.status(500).json({ error: error.message });
   }
 });
 
