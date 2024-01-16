@@ -116,24 +116,39 @@ router.post("/enroll/:courseId", async (req, res) => {
 
     console.log(courseId, studentId);
 
+    // check if the course exists
     const courseDoc = await Course.findById(courseId);
     console.log(courseDoc);
+
+
     if (!courseDoc) {
       return res.status(404).json({ error: "Course not found" });
     }
 
+    // found the student with courseId
     const studentDoc = await Student.findOne({ studentId });
     console.log(studentDoc);
     if (!studentDoc) {
       return res.status(404).json({ error: "Student not found" });
     }
 
+    // check if the student is already enrolled in the course
+    const isEnrolled = await Course.findOne({ studentsEnrolled: studentDoc._id });
+    if(isEnrolled){
+      return res.status(403).json({ error: "Student already enrolled" });
+    }
     const updatedCourseDoc = await Course.findByIdAndUpdate(
       courseId,
       { $push: { studentsEnrolled: studentDoc._id } },
       { new: true }
     );
     console.log(updatedCourseDoc);
+
+    const updatedStudentDoc = await Student.findByIdAndUpdate(
+      studentDoc._id,
+      { $push: { enrolledCourses: courseDoc._id } },
+      { new: true }
+    );
 
     res.status(200).json({ message: "Enrolled successfully" });
   } catch (error) {
