@@ -13,10 +13,10 @@ router.post("/", async (req, res) => {
     let user;
 
     if (role === "student") {
-      const { studentId } = req.body;
+      const studentId = req.body.userId;
       user = await Student.findOne({ email, studentId });
     } else if (role === "teacher") {
-      const { teacherId } = req.body;
+      const teacherId  = req.body.userId;
       user = await Teacher.findOne({ email, teacherId });
     }
 
