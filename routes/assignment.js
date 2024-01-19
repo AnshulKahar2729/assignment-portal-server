@@ -20,6 +20,46 @@ cloudinary.config({
 const storage = multer.memoryStorage();
 const upload = multer({ storage });
 
+// To get all submitted assignment as a student
+router.get("/submittedassignment", async (req, res) => {
+  /*  if (req.query.role !== "student") {
+    return res.status(403).json({ error: "Unauthorized access" });
+  } */
+  try {
+    const { studentId } = req.body;
+
+    console.log("studentId:", studentId)
+    if (!studentId) {
+      return res.status(403).json({ error: "Unauthorized access" });
+    }
+
+    const studentDoc = await Student.findOne({ studentId });
+
+    if (!studentDoc) {
+      return res.status(404).json({ error: "Student not found" });
+    }
+
+    console.log(studentDoc);
+    const submissionsIdArr = studentDoc.submittedAssignment; // arrays of submissions id
+
+    console.log(submissionsIdArr)
+    const submissionsArr = [];
+    
+
+    submissionsIdArr?.forEach(async (submissionId) => {
+      const submissionDoc = await SubmittedAssignment.findById(submissionId);
+      submissionsArr.push(submissionDoc);
+    });
+
+    res.status(200).json(submissionsArr);
+  } catch (err) {
+    console.log(err);
+    res
+      .status(500)
+      .json({ error: "Failed to get all assignment as a student" });
+  }
+});
+
 // POST - /api/assignment/?role=teacher --> for uploading assignment
 /* router.post("/", (req, res) => {
   if (req.query.role !== "teacher") {
@@ -235,40 +275,6 @@ router.post("/submitassignment/:assignmentId", (req, res) => {
   }
 });
 
-// To get all submitted assignment as a student
-router.get("/submittedassignment", async (req, res) => {
-  /*  if (req.query.role !== "student") {
-    return res.status(403).json({ error: "Unauthorized access" });
-  } */
-  try {
-    const { studentId } = req.body;
 
-    if (!studentId) {
-      return res.status(403).json({ error: "Unauthorized access" });
-    }
-
-    const studentDoc = await Student.findOne({ studentId });
-
-    if (!studentDoc) {
-      return res.status(404).json({ error: "Student not found" });
-    }
-
-    const submissionsIdArr = studentDoc.submittedAssignment; // arrays of submissions id
-
-    const submissionsArr = [];
-
-    submissionsIdArr.forEach(async (submissionId) => {
-      const submissionDoc = await SubmittedAssignment.findById(submissionId);
-      submissionsArr.push(submissionDoc);
-    });
-
-    res.status(200).json(submissionsArr);
-  } catch (err) {
-    console.log(err);
-    res
-      .status(500)
-      .json({ error: "Failed to get all assignment as a student" });
-  }
-});
 
 module.exports = router;
