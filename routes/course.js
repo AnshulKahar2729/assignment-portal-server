@@ -14,7 +14,7 @@ router.get("/:courseId", async (req, res) => {
     if (!course) {
       return res.status(404).json({ error: "Course not found" });
     }
-+
+
     res.json(course);
   } catch (error) {
     console.error("Error fetching course:", error);
