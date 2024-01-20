@@ -23,7 +23,7 @@ router.get("/:courseId", async (req, res) => {
 });
 
 // GET all course general
-router.get("/", async (req, res) => {
+router.post("/", async (req, res) => {
   try {
     if (req.query.role === "teacher") {
       const { teacherId } = req.body;
@@ -39,11 +39,12 @@ router.get("/", async (req, res) => {
     } else if (req.query.role === "student") {
       const { studentId } = req.body;
 
+      console.log(studentId)
       // need to find the courses in which the student is enrolled
       const studentDoc = await Student.findOne({ studentId });
 
       if (!studentDoc) {
-        return res.status(404).json({ error: "Student not found" });
+        return res.status(404).json({ error: "Student not foundedd" });
       }
 
       const enrolledCoursesDoc = await Course.find({ studentsEnrolled: studentDoc._id });   // array of courses in which the student is enrolled

@@ -219,61 +219,106 @@ router.get("/:assignmentId", async (req, res) => {
 });
 
 // STUDENTS
-// To submit an assignment as a student
-router.post("/submitassignment/:assignmentId", (req, res) => {
-  if (req.query.role !== "student") {
-    return res.status(403).json({ error: "Unauthorized access" });
+router.post(
+  "/submitassignment/:assignmentId",
+  upload.single("file"),
+  async (req, res) => {
+    if (req.query.role !== "student") {
+      return res.status(403).json({ error: "Unauthorized access" });
+    }
+
+    try {
+      const { assignmentId } = req.params;
+      const { studentId } = req.body;
+      console.log("uploadedAssignment", assignmentId);
+
+      const result = await cloudinary.uploader
+        .upload_stream({}, async (error, result) => {
+          if (error) {
+            console.error(error);
+            res.status(500).json({ error });
+          } else {
+            console.log(result);
+            const URL = result.secure_url;
+
+            const submittedAssignmentDoc = await SubmittedAssignment.create({
+              submittedBy: studentId,
+              file: URL,
+              title: "FIRST SUBMITTED ASSIGNMENT",
+              submissionDate: new Date(),
+              assignment: assignmentId,
+            });
+
+            console.log("submittedAssignment", submittedAssignmentDoc);
+
+            const assignmentDoc = await Assignment.updateOne(
+              {
+                _id: assignmentId,
+              },
+              { $push: { submissions: submittedAssignmentDoc._id } }
+            );
+
+            console.log("assignment", assignmentDoc);
+
+            const studentDoc = await Student.updateOne(
+              {
+                studentId,
+              },
+              { $push: { submittedAssignment: submittedAssignmentDoc._id } }
+            );
+
+            res.json({ URL: submittedAssignmentDoc.file });
+          }
+        })
+        .end(req.file.buffer);
+
+      // Call multer manually to handle file upload
+      // upload.single("file")(req, res, async (err) => {
+      //   if (err) {
+      //     console.error(err);
+      //     return res.status(500).json({ error: "Failed to handle file upload" });
+      //   }
+
+      //   const URL = await uploadOnCloudinary(req.file.path);
+
+      //   // shyd submittedAssignment mein isse assignment hata dena chahiye
+      //   const submittedAssignmentDoc = await SubmittedAssignment.create({
+      //     submittedBy: studentId,
+      //     file: URL,
+      //     title: "FIRST SUBMITTED ASSIGNMENT",
+      //     submissionDate: new Date(),
+      //     assignment: assignmentId,
+      //   });
+
+      //   console.log("submittedAssignment", submittedAssignmentDoc);
+
+      //   const assignmentDoc = await Assignment.updateOne(
+      //     {
+      //       _id: assignmentId,
+      //     },
+      //     { $push: { submissions: submittedAssignmentDoc._id } }
+      //   );
+
+      //   console.log("assignment", assignmentDoc);
+
+      //   const studentDoc = await Student.updateOne(
+      //     {
+      //       studentId,
+      //     },
+      //     { $push: { submittedAssignment: submittedAssignmentDoc._id } }
+      //   );
+
+      //   res.json({ URL: submittedAssignmentDoc.file });
+
+      // });
+    } catch (err) {
+      console.log(err);
+      res
+        .status(500)
+        .json({ error: "Failed to submit assignment as a student" });
+    }
   }
-
-  try {
-    const { assignmentId } = req.params;
-    const { studentId } = req.body;
-    console.log("uploadedAssignment", assignmentId);
-    // Submit assignment in the database as a student
-
-    // Call multer manually to handle file upload
-    upload.single("file")(req, res, async (err) => {
-      if (err) {
-        console.error(err);
-        return res.status(500).json({ error: "Failed to handle file upload" });
-      }
-
-      const URL = await uploadOnCloudinary(req.file.path);
-
-      // shyd submittedAssignment mein isse assignment hata dena chahiye
-      const submittedAssignmentDoc = await SubmittedAssignment.create({
-        submittedBy: studentId,
-        file: URL,
-        title: "FIRST SUBMITTED ASSIGNMENT",
-        submissionDate: new Date(),
-        assignment: assignmentId,
-      });
-
-      console.log("submittedAssignment", submittedAssignmentDoc);
-
-      const assignmentDoc = await Assignment.updateOne(
-        {
-          _id: assignmentId,
-        },
-        { $push: { submissions: submittedAssignmentDoc._id } }
-      );
-
-      console.log("assignment", assignmentDoc);
-
-      const studentDoc = await Student.updateOne(
-        {
-          studentId,
-        },
-        { $push: { submittedAssignment: submittedAssignmentDoc._id } }
-      );
-
-      res.json({ URL: submittedAssignmentDoc.file });
-    });
-  } catch (err) {
-    console.log(err);
-    res.status(500).json({ error: "Failed to submit assignment as a student" });
-  }
-});
+);
 
 
 
