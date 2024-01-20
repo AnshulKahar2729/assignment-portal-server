@@ -17,6 +17,7 @@ const loginRouter = require("./routes/login");
 const registerRouter = require("./routes/register");
 const profileRouter = require("./routes/profile");
 const courseRouter = require("./routes/course");
+const teacherRouter = require("./routes/teacher");
 
 const PORT = process.env.PORT || 4000;
 
@@ -46,6 +47,7 @@ app.use("/api/course", courseRouter);
 app.use("/api/login", loginRouter);
 app.use("/api/register", registerRouter);
 app.use("/api/profile", profileRouter);
+app.use("/api/teacher", teacherRouter);
 
 app.get("/api/test", (req, res) => {
   res.send("Hello World!");
