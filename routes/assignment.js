@@ -28,7 +28,7 @@ router.get("/submittedassignment", async (req, res) => {
   try {
     const { studentId } = req.body;
 
-    console.log("studentId:", studentId)
+    console.log("studentId:", studentId);
     if (!studentId) {
       return res.status(403).json({ error: "Unauthorized access" });
     }
@@ -42,9 +42,8 @@ router.get("/submittedassignment", async (req, res) => {
     console.log(studentDoc);
     const submissionsIdArr = studentDoc.submittedAssignment; // arrays of submissions id
 
-    console.log(submissionsIdArr)
+    console.log(submissionsIdArr);
     const submissionsArr = [];
-    
 
     submissionsIdArr?.forEach(async (submissionId) => {
       const submissionDoc = await SubmittedAssignment.findById(submissionId);
@@ -107,7 +106,7 @@ router.post("/", upload.single("file"), async (req, res) => {
   }
 
   try {
-    const { title } = req.body;
+    const { title, courseId, endDate, teacherId } = req.body;
     const result = await cloudinary.uploader
       .upload_stream(
         {
@@ -121,15 +120,20 @@ router.post("/", upload.single("file"), async (req, res) => {
             // You can now handle the Cloudinary result, e.g., store the URL or public ID in MongoDB.
             console.log(result);
             const URL = result.secure_url;
+            const courseDocById = await Course.findById(courseId);
             const assignmentDoc = await Assignment.create({
               file: URL,
               title: title,
+              startDate: new Date().toLocaleDateString,
+              endDate: endDate,
+              course: courseDocById._id,
+              createdBy: teacherId,
             });
 
             console.log("assign", assignmentDoc);
             const courseDoc = await Course.updateOne(
               {
-                _id: "65a049c12de4d08cd7848bcb",
+                _id: courseId,
               },
               { $push: { assignments: assignmentDoc._id } }
             );
@@ -319,7 +323,5 @@ router.post(
     }
   }
 );
-
-
 
 module.exports = router;
