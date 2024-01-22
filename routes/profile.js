@@ -9,26 +9,45 @@ require("dotenv").config();
 router.get("/", async (req, res) => {
   try {
     const authHeader = req.header("Authorization");
-    console.log("header ", authHeader);
+    console.log("header ", authHeader, "/n");
     if (!authHeader || !authHeader.startsWith("Bearer ")) {
       return res.status(401).json({ message: "Unauthorized" });
     }
 
     const token = authHeader.split(" ")[1];
 
-    console.log(token);
+    console.log(token, "token");
 
     if (!token) {
       return res.status(401).json({ message: "Unauthorized" });
     }
 
-    const payLoad = jwt.verify(token, process.env.JWT_SECRET);
+    console.log(process.env.JWT_SECRET);
+    const payLoad = jwt.verify(token, process.env.JWT_SECRET, {
+      ignoreExpiration: false,
+    });
+    console.log("payload", payLoad);
     if (!payLoad) {
       return res.status(401).json({ message: "Unauthorized" });
     }
 
     if (payLoad.role === "student") {
-      const student = await Student.findById(payLoad.id);
+      const student = await Student.findById(payLoad.id).populate({
+        path : "enrolledCourses",
+        model : "Course",
+        populate : {
+          path : "teacher",
+          model : "Teacher",
+        },
+        populate : {
+          path : "assignments",
+          model : "Assignment",
+        },
+        populate : {
+          path : "teacher",
+          model : "Teacher",
+        }
+      })
       if (!student) {
         return res.status(404).json({ message: "Student not found" });
       }

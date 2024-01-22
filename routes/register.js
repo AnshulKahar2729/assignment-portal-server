@@ -40,7 +40,6 @@ router.post("/", async (req, res) => {
       const token = jwt.sign(
         { studentId, id:studentDoc._id, name:studentDoc.name, email: studentDoc.email, role: "student" },
         process.env.JWT_SECRET,
-        { expiresIn: "24h" }
       );
 
       console.log(token);

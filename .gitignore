@@ -1,6 +1,6 @@
 /node_modules
 
-#misc
+#miscellanous
 .DS_Store
 .env
 .env.local

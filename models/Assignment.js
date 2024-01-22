@@ -13,7 +13,7 @@ const assignmentSchema = new Schema({
   file: {
     type: String,
     trim: true,
-    required : true,
+    required: true,
   },
   title: {
     type: String,
@@ -30,6 +30,10 @@ const assignmentSchema = new Schema({
       ref: "SubmittedAssignment",
     },
   ],
+  course: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Course",
+  },
 });
 
 const Assignment = model("Assignment", assignmentSchema);

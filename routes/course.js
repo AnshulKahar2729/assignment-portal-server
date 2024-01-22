@@ -39,7 +39,7 @@ router.post("/", async (req, res) => {
     } else if (req.query.role === "student") {
       const { studentId } = req.body;
 
-      console.log(studentId)
+      console.log(studentId);
       // need to find the courses in which the student is enrolled
       const studentDoc = await Student.findOne({ studentId });
 
@@ -47,35 +47,60 @@ router.post("/", async (req, res) => {
         return res.status(404).json({ error: "Student not foundedd" });
       }
 
-      const enrolledCoursesDoc = await Course.find({ studentsEnrolled: studentDoc._id });   // array of courses in which the student is enrolled
-      if(enrolledCoursesDoc){
+      const enrolledCoursesDoc = await Course.find({
+        studentsEnrolled: studentDoc._id,
+      }); // array of courses in which the student is enrolled
+      if (enrolledCoursesDoc) {
         const sendCourses = [];
-        const courses = await Course.find();   // array of all courses
+        const courses = await Course.find(); // array of all courses
 
         courses.map((course, index) => {
-          
-            enrolledCoursesDoc.map((enrolledCourse, index) => {
-                if(enrolledCourse._id === course.id){
-                    sendCourses.push(course);
-                } else {
-                    sendCourses.push({courseId: course._id, name : course.name, teacher : course.teacher, numberOfStudents : course.studentsEnrolled.length});
-                }
-            })
-        })
-        
-        console.log('this runned:', sendCourses)
-        res.status(200).json({sendCourses});
+          enrolledCoursesDoc.map((enrolledCourse, index) => {
+            if (enrolledCourse._id === course.id) {
+              sendCourses.push(course);
+            } else {
+              sendCourses.push({
+                name: course.name,
+                teacher: course.teacher,
+                numberOfStudents: course.studentsEnrolled.length,
+              });
+            }
+          });
+        });
+        res.status(200).json({ sendCourses });
       } else {
         const courses = await Course.find();
-        res.status(200).json({courseId: courses._id[0], name : courses.name, teacher : courses.teacher, numberOfStudents : courses.studentsEnrolled.length});
+        res.status(200).json({name : courses.name, teacher : courses.teacher, numberOfStudents : courses.studentsEnrolled.length});
       }
-      
     } else {
       res.status(403).json({ error: "Unauthorized access" });
     }
   } catch (error) {
     console.error("Error fetching courses:", error);
     res.status(500).send("Internal Server Error");
+  }
+});
+
+router.get("/fake/:courseId", async (req, res) => {
+  try {
+    const { courseId } = req.params;
+
+    console.log(courseId);
+
+    const courseDoc = await Course.findById(courseId)
+      .populate({
+        path: "studentsEnrolled",
+        model: "Student",
+        populate: {
+          path: "enrolledCourses",
+          model: "Course", // Adjust 'Course' to match your actual course model name
+        },
+      })
+      .populate("teacher");
+
+    res.json({ courseDoc });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
   }
 });
 
@@ -124,7 +149,6 @@ router.post("/enroll/:courseId", async (req, res) => {
     const courseDoc = await Course.findById(courseId);
     console.log(courseDoc);
 
-
     if (!courseDoc) {
       return res.status(404).json({ error: "Course not found" });
     }
@@ -137,8 +161,10 @@ router.post("/enroll/:courseId", async (req, res) => {
     }
 
     // check if the student is already enrolled in the course
-    const isEnrolled = await Course.findOne({ studentsEnrolled: studentDoc._id });
-    if(isEnrolled){
+    const isEnrolled = await Course.findOne({
+      studentsEnrolled: studentDoc._id,
+    });
+    if (isEnrolled) {
       return res.status(403).json({ error: "Student already enrolled" });
     }
     const updatedCourseDoc = await Course.findByIdAndUpdate(
