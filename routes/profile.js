@@ -32,7 +32,22 @@ router.get("/", async (req, res) => {
     }
 
     if (payLoad.role === "student") {
-      const student = await Student.findById(payLoad.id);
+      const student = await Student.findById(payLoad.id).populate({
+        path : "enrolledCourses",
+        model : "Course",
+        populate : {
+          path : "teacher",
+          model : "Teacher",
+        },
+        populate : {
+          path : "assignments",
+          model : "Assignment",
+        },
+        populate : {
+          path : "teacher",
+          model : "Teacher",
+        }
+      })
       if (!student) {
         return res.status(404).json({ message: "Student not found" });
       }
