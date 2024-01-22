@@ -53,18 +53,21 @@ router.post("/", async (req, res) => {
         const courses = await Course.find();   // array of all courses
 
         courses.map((course, index) => {
+          
             enrolledCoursesDoc.map((enrolledCourse, index) => {
                 if(enrolledCourse._id === course.id){
                     sendCourses.push(course);
                 } else {
-                    sendCourses.push({name : course.name, teacher : course.teacher, numberOfStudents : course.studentsEnrolled.length});
+                    sendCourses.push({courseId: course._id, name : course.name, teacher : course.teacher, numberOfStudents : course.studentsEnrolled.length});
                 }
             })
         })
+        
+        console.log('this runned:', sendCourses)
         res.status(200).json({sendCourses});
       } else {
         const courses = await Course.find();
-        res.status(200).json({name : courses.name, teacher : courses.teacher, numberOfStudents : courses.studentsEnrolled.length});
+        res.status(200).json({courseId: courses._id[0], name : courses.name, teacher : courses.teacher, numberOfStudents : courses.studentsEnrolled.length});
       }
       
     } else {

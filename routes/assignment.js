@@ -21,7 +21,7 @@ const storage = multer.memoryStorage();
 const upload = multer({ storage });
 
 // To get all submitted assignment as a student
-router.get("/submittedassignment", async (req, res) => {
+router.post("/submittedassignment", async (req, res) => {
   /*  if (req.query.role !== "student") {
     return res.status(403).json({ error: "Unauthorized access" });
   } */
@@ -39,10 +39,8 @@ router.get("/submittedassignment", async (req, res) => {
       return res.status(404).json({ error: "Student not found" });
     }
 
-    console.log(studentDoc);
     const submissionsIdArr = studentDoc.submittedAssignment; // arrays of submissions id
 
-    console.log(submissionsIdArr)
     const submissionsArr = [];
     
 
@@ -52,6 +50,7 @@ router.get("/submittedassignment", async (req, res) => {
     });
 
     res.status(200).json(submissionsArr);
+    
   } catch (err) {
     console.log(err);
     res
