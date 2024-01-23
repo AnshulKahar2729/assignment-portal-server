@@ -274,7 +274,7 @@ router.post(
             );
             console.log("studentDoc",studentDoc);
 
-            res.json({ URL: submittedAssignmentDoc.file });
+            res.status(200).json({ URL: submittedAssignmentDoc.file });
           }
         })
         .end(req.file.buffer);
@@ -318,7 +318,6 @@ router.post(
       //   res.json({ URL: submittedAssignmentDoc.file });
 
       // });
-      console.log("FAILURE")
     } catch (err) {
       console.log(err);
       res
