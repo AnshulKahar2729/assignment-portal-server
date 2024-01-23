@@ -70,11 +70,7 @@ router.post("/", async (req, res) => {
         res.status(200).json({ sendCourses });
       } else {
         const courses = await Course.find();
-        res.status(200).json({
-          name: courses.name,
-          teacher: courses.teacher,
-          numberOfStudents: courses.studentsEnrolled.length,
-        });
+        res.status(200).json({name : courses.name, teacher : courses.teacher, numberOfStudents : courses.studentsEnrolled.length});
       }
     } else {
       res.status(403).json({ error: "Unauthorized access" });
