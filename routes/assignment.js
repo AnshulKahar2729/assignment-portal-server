@@ -233,7 +233,7 @@ router.post(
 
     try {
       const { assignmentId } = req.params;
-      const { studentId } = req.body;
+      const { studentId, title } = req.body;
       console.log("uploadedAssignment", assignmentId);
       console.log("stud Id", studentId);
 
@@ -250,7 +250,7 @@ router.post(
             const submittedAssignmentDoc = await SubmittedAssignment.create({
               submittedBy: studentId,
               file: URL,
-              title: "FIRST SUBMITTED ASSIGNMENT",
+              title: title,
               submissionDate: new Date(),
               assignment: assignmentId,
             });
