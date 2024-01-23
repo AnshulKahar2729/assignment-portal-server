@@ -42,6 +42,7 @@ router.post("/", async (req, res) => {
       console.log(studentId);
       // need to find the courses in which the student is enrolled
       const studentDoc = await Student.findOne({ studentId });
+      console.log(studentDoc);
 
       if (!studentDoc) {
         return res.status(404).json({ error: "Student not foundedd" });
@@ -50,6 +51,9 @@ router.post("/", async (req, res) => {
       const enrolledCoursesDoc = await Course.find({
         studentsEnrolled: studentDoc._id,
       }); // array of courses in which the student is enrolled
+      
+      console.log("enrolll", enrolledCoursesDoc);
+
       if (enrolledCoursesDoc) {
         const sendCourses = [];
         const courses = await Course.find(); // array of all courses
@@ -60,6 +64,7 @@ router.post("/", async (req, res) => {
               sendCourses.push(course);
             } else {
               sendCourses.push({
+                id: course._id,
                 name: course.name,
                 teacher: course.teacher,
                 numberOfStudents: course.studentsEnrolled.length,
@@ -70,7 +75,16 @@ router.post("/", async (req, res) => {
         res.status(200).json({ sendCourses });
       } else {
         const courses = await Course.find();
-        res.status(200).json({name : courses.name, teacher : courses.teacher, numberOfStudents : courses.studentsEnrolled.length});
+        const sendCourses = [];
+        courses.map((course, index) => {
+          sendCourses.push({
+            id: course._id,
+            name: course.name,
+            teacher: course.teacher,
+            numberOfStudents: course.studentsEnrolled.length,
+          });
+        })
+        res.status(200).json({sendCourses});
       }
     } else {
       res.status(403).json({ error: "Unauthorized access" });
