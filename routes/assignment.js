@@ -235,6 +235,7 @@ router.post(
       const { assignmentId } = req.params;
       const { studentId } = req.body;
       console.log("uploadedAssignment", assignmentId);
+      console.log("stud Id", studentId);
 
       const result = await cloudinary.uploader
         .upload_stream({}, async (error, result) => {
@@ -244,6 +245,7 @@ router.post(
           } else {
             console.log(result);
             const URL = result.secure_url;
+            console.log("URL:", URL)
 
             const submittedAssignmentDoc = await SubmittedAssignment.create({
               submittedBy: studentId,
@@ -270,6 +272,7 @@ router.post(
               },
               { $push: { submittedAssignment: submittedAssignmentDoc._id } }
             );
+            console.log("studentDoc",studentDoc);
 
             res.json({ URL: submittedAssignmentDoc.file });
           }
@@ -315,11 +318,12 @@ router.post(
       //   res.json({ URL: submittedAssignmentDoc.file });
 
       // });
+      console.log("FAILURE")
     } catch (err) {
       console.log(err);
       res
         .status(500)
-        .json({ error: "Failed to submit assignment as a student" });
+        .json({ error: err.message });
     }
   }
 );
