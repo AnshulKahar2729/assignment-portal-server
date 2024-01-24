@@ -33,21 +33,21 @@ router.get("/", async (req, res) => {
 
     if (payLoad.role === "student") {
       const student = await Student.findById(payLoad.id).populate({
-        path : "enrolledCourses",
-        model : "Course",
-        populate : {
-          path : "teacher",
-          model : "Teacher",
+        path: "enrolledCourses",
+        model: "Course",
+        populate: {
+          path: "teacher",
+          model: "Teacher",
         },
-        populate : {
-          path : "assignments",
-          model : "Assignment",
+        populate: {
+          path: "assignments",
+          model: "Assignment",
         },
-        populate : {
-          path : "teacher",
-          model : "Teacher",
-        }
-      })
+        populate: {
+          path: "teacher",
+          model: "Teacher",
+        },
+      });
       if (!student) {
         return res.status(404).json({ message: "Student not found" });
       }
@@ -58,7 +58,14 @@ router.get("/", async (req, res) => {
       console.log(studentWithoutPassword);
       return res.status(200).json(studentWithoutPassword);
     } else if (payLoad.role === "teacher") {
-      const teacher = await Teacher.findById(payLoad.id);
+      const teacher = await Teacher.findById(payLoad.id).populate({
+        path: "assignedCourses",
+        model: "Course",
+        populate: {
+          path: "studentsEnrolled",
+          model: "Student",
+        },
+      });
       if (!teacher) {
         return res.status(404).json({ message: "Teacher not found" });
       }
