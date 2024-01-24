@@ -52,6 +52,7 @@ router.get("/", async (req, res) => {
       // const { password, ...studentWithoutPassword } = student._doc;
 
       // console.log(studentWithoutPassword);
+      console.log(student)
       return res.status(200).json(student);
     } else if (payLoad.role === "teacher") {
       const teacher = await Teacher.findById(payLoad.id).populate({
