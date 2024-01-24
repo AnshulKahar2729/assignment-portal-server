@@ -126,7 +126,7 @@ router.post("/", upload.single("file"), async (req, res) => {
             const assignmentDoc = await Assignment.create({
               file: URL,
               title: title,
-              startDate: new Date().toLocaleDateString(),
+              startDate: new Date(),
               endDate: endDate,
               course: courseDocById._id,
               createdBy: teacherId,
