@@ -55,7 +55,7 @@ router.get("/", async (req, res) => {
       // Remove password from student object using destructuring
       // const { password, ...studentWithoutPassword } = student._doc;
 
-      console.log(studentWithoutPassword);
+      // console.log(studentWithoutPassword);
       return res.status(200).json(student);
     } else if (payLoad.role === "teacher") {
       const teacher = await Teacher.findById(payLoad.id).populate({
