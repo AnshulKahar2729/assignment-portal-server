@@ -270,10 +270,12 @@ router.post(
 
             const studentDoc = await Student.updateOne(
               {
-                studentId,
+                _id : studentId,
               },
               { $push: { submittedAssignment: submittedAssignmentDoc._id } }
             );
+
+            // we want 
             console.log("studentDoc",studentDoc);
 
             res.status(200).json({ URL: submittedAssignmentDoc.file });
