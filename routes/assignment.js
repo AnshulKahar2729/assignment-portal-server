@@ -107,6 +107,7 @@ router.post("/", upload.single("file"), async (req, res) => {
 
   try {
     const { title, courseId, endDate, teacherId } = req.body;
+    console.log( title, courseId, endDate, teacherId)
     const result = await cloudinary.uploader
       .upload_stream(
         {
@@ -120,11 +121,12 @@ router.post("/", upload.single("file"), async (req, res) => {
             // You can now handle the Cloudinary result, e.g., store the URL or public ID in MongoDB.
             console.log(result);
             const URL = result.secure_url;
+            console.log("URL", URL)
             const courseDocById = await Course.findById(courseId);
             const assignmentDoc = await Assignment.create({
               file: URL,
               title: title,
-              startDate: new Date().toLocaleDateString,
+              startDate: new Date().toLocaleDateString(),
               endDate: endDate,
               course: courseDocById._id,
               createdBy: teacherId,
