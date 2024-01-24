@@ -43,10 +43,6 @@ router.get("/", async (req, res) => {
           path: "assignments",
           model: "Assignment",
         },
-        populate: {
-          path: "teacher",
-          model: "Teacher",
-        },
       });
       if (!student) {
         return res.status(404).json({ message: "Student not found" });
