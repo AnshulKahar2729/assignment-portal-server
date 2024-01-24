@@ -42,6 +42,10 @@ router.get("/", async (req, res) => {
         populate: {
           path: "assignments",
           model: "Assignment",
+          populate : {
+            path : "submissions",
+            model : "SubmittedAssignment",
+          }
         },
       });
       if (!student) {
